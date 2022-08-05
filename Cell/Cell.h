@@ -12,11 +12,11 @@ public:
 
     Cell(Cell &other);
 
+    Cell &operator=(Cell other);
+
     void change_content(std::string &new_content);
 
-    std::string get_content();
-
-    Cell& operator=(Cell other);
+    std::string &get_content();
 };
 
 #endif //DATA_TABLES_CELL_H

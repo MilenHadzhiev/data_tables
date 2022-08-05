@@ -4,6 +4,7 @@ Cell::Cell() {
     content = "";
 }
 
+
 Cell::Cell(std::string &new_content) {
     content = new_content;
 }
@@ -16,7 +17,7 @@ void Cell::change_content(std::string &new_content) {
     content = new_content;
 }
 
-std::string Cell::get_content() {
+std::string &Cell::get_content() {
     return content;
 }
 
