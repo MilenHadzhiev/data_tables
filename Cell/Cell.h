@@ -8,15 +8,17 @@ class Cell {
 public:
     Cell();
 
-    Cell(std::string &new_content);
+    Cell(std::string new_content);
+
+    Cell(const Cell &other);
 
     Cell(Cell &other);
 
     Cell &operator=(Cell other);
 
-    void change_content(std::string &new_content);
+    void change_content(std::string new_content);
 
-    std::string &get_content();
+    std::string get_content() const;
 };
 
 #endif //DATA_TABLES_CELL_H

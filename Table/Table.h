@@ -1,16 +1,28 @@
 #ifndef DATA_TABLES_TABLE_H
 #define DATA_TABLES_TABLE_H
-#include "../Cell/Cell.h"
-#include <cstring>
-#include "../Row/Row.h"
-class Table{
-    string name;
-    Row* rows;
-    Col* cols;
-    Cell* cells;
 
+#include <string>
+#include <vector>
+#include "../Cell/Cell.h"
+#include "../Row/Row.h"
+
+class Table{
+    std::string name;
+    std::vector<Row> rows;
+    int cols_count = get_cols_count();
 public:
     Table();
+    Table(std::string new_name, std::vector<Row> new_rows);
+    Table(Table &other);
+
+    Table& operator=(Table other);
+
+    void change_name(std::string &new_name);
+    void change_cell_content_by_position(unsigned int row_id, unsigned int col_id, std::string new_content);
+
+    std::string get_name();
+    std::string get_cell_content_by_id(unsigned int row_id, unsigned int col_id);
+    int get_cols_count();
 };
 
 #endif //DATA_TABLES_TABLE_H
