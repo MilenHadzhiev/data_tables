@@ -25,6 +25,15 @@ int main() {
     Row empty_row;
     Table table("My table", row_vect);
     table.add_row(empty_row);
+    int n;
+    std::cin >> n;
+    for (int i = 0; i < n; i++) {
+        std::cout << "Shit...";
+    }
+    table.print();
+
+
+
 
 //    std::cout << table.get_rows_count();
 //    std::ifstream file("../table.txt");
@@ -38,5 +47,6 @@ int main() {
 //        }
 //        file.close();
 //    }
+
     return 0;
 }

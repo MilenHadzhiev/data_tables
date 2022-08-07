@@ -8,7 +8,7 @@ Currency::Currency(int new_money, currency_type new_type) {
     if (currency == EUR) {
         symbol = new char[2];
         strcpy(symbol, "€");
-    } else if (currency == DOL) {
+    } else if (currency == USD) {
         symbol = new char[2];
         strcpy(symbol, "$");
     } else {
@@ -21,7 +21,7 @@ Currency::Currency(int new_money, const char *new_symbol) {
     if (strcmp(new_symbol, "$") == 0) {
         symbol = new char[2];
         strcpy(symbol, new_symbol);
-        currency = DOL;
+        currency = USD;
     } else if (strcmp(new_symbol, "€") == 0) {
         symbol = new char[2];
         strcpy(symbol, new_symbol);
@@ -31,7 +31,7 @@ Currency::Currency(int new_money, const char *new_symbol) {
         strcpy(symbol, "лв.");
         currency = BGN;
     } else {
-        throw std::invalid_argument("Currency must be BGN, EUR or DOL");
+        throw std::invalid_argument("Currency must be BGN, EUR or USD");
     }
     money = new_money;
 }
@@ -57,36 +57,20 @@ currency_type Currency::get_currency_type() const {
 const char *Currency::get_currency_type_string() const {
     return currency == BGN ? "BGN" :
            currency == EUR ? "EUR" :
-           "DOL";
+           "USD";
 }
 
 const char *Currency::get_symbol() const {
     return symbol;
 }
 
-void Currency::change_currency(currency_type new_currency) {
-    currency = new_currency;
-}
-
-void Currency::change_currency(const char *new_currency) {
-    if (strcmp(new_currency, "$") == 0) {
-        delete[] symbol;
-        symbol = new char[2];
-        strcpy(symbol, new_currency);
-        currency = DOL;
-    } else if (strcmp(new_currency, "€") == 0) {
-        delete[] symbol;
-        symbol = new char[2];
-        strcpy(symbol, new_currency);
-        currency = EUR;
-    } else if (strcmp(new_currency, "лв.") == 0) {
-        delete[] symbol;
-        symbol = new char[4];
-        strcpy(symbol, "лв.");
-        currency = BGN;
-    } else {
-        throw std::invalid_argument("Currency must be BGN, EUR or DOL");
+void Currency::convert_to_BGN() {
+    if (currency == EUR) {
+        money *= 1.96;
+    } else if (currency == USD) {
+        money *= 1.92;
     }
+    currency = BGN;
 }
 
 void Currency::change_money(int new_money) {

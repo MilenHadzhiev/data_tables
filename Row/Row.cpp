@@ -26,9 +26,16 @@ std::string Row::get_cell_content_by_position(unsigned int col_id) const {
     if (col_id < cells.size()) {
         return cells[col_id].get_content();
     }
-    return " ";
+    return "";
 }
 
-int Row::get_cells_count() const {
+unsigned int Row::get_cells_count() const {
     return (int) cells.size();
+}
+
+unsigned int Row::get_cell_length(unsigned int cell_id) const {
+    if (cell_id >= cells.size()) {
+        return 0;
+    }
+    return cells[cell_id].get_cell_length();
 }

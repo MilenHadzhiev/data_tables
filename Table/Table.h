@@ -1,6 +1,10 @@
 #ifndef DATA_TABLES_TABLE_H
 #define DATA_TABLES_TABLE_H
 
+enum sorting_types {
+    ASC, DESC
+};
+
 #include <string>
 #include <vector>
 #include "../Cell/Cell.h"
@@ -10,6 +14,11 @@ class Table {
     std::string name;
     std::vector<Row> rows;
     int cols_count = get_cols_count();
+
+    static void print_empty_string(unsigned int cell_len);
+
+    unsigned int get_longest_column_length(unsigned int col_id) const;
+
 public:
     Table();
 
@@ -21,6 +30,16 @@ public:
 
     Table(Table &other);
 
+    void load(std::ifstream &file);
+
+    void save(std::ostream &file) const;
+
+    void print() const;
+
+    void edit(unsigned int row_id, unsigned int col_id, std::string new_content);
+
+    void sort(unsigned int col_id, sorting_types to_sort = ASC);
+
     Table &operator=(Table other);
 
     void change_name(std::string &new_name);
@@ -29,13 +48,13 @@ public:
 
     void add_row(Row &new_row);
 
-    std::string get_name();
+    std::string get_name() const;
 
-    std::string get_cell_content_by_id(unsigned int row_id, unsigned int col_id);
+    std::string get_cell_content_by_id(unsigned int row_id, unsigned int col_id) const;
 
-    int get_cols_count();
+    int get_cols_count() const;
 
-    int get_rows_count();
+    int get_rows_count() const;
 };
 
 #endif //DATA_TABLES_TABLE_H

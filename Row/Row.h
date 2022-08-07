@@ -21,7 +21,9 @@ public:
 
     std::string get_cell_content_by_position(unsigned int col_id) const;
 
-    int get_cells_count() const;
+    unsigned int get_cells_count() const;
+
+    unsigned int get_cell_length(unsigned int cell_id) const;
 };
 
 #endif //DATA_TABLES_ROW_H

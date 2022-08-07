@@ -31,3 +31,7 @@ Cell& Cell::operator=(Cell other) {
     std::swap(content, other.content);
     return *this;
 }
+
+unsigned int Cell::get_cell_length() const {
+    return content.length();
+}

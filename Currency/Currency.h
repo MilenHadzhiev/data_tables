@@ -3,9 +3,13 @@
 
 int str_len(const char *s);
 
+// USD 1 = BGN 1.92
+// EUR 1 = BGN 1.96
+
 enum currency_type {
-    BGN, EUR, DOL
+    BGN, EUR, USD
 };
+
 
 class Currency {
     int money;
@@ -28,9 +32,7 @@ public:
 
     const char *get_symbol() const;
 
-    void change_currency(currency_type new_currency);
-
-    void change_currency(const char *new_currency);
+    void convert_to_BGN();
 
     void change_money(int new_money);
 
