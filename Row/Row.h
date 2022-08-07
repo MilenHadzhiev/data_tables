@@ -11,6 +11,8 @@ public:
 
     Row(std::vector<Cell> &new_cells);
 
+    Row(const Row &other);
+
     Row(Row &other);
 
     Row &operator=(Row other);

@@ -1,22 +1,32 @@
 #include <iostream>
 #include <cstring>
-#include "Currency/Currency.h"
-#include "Cell/Cell.h"
-#include "Row/Row.h"
-#include <typeinfo>
 #include <fstream>
 #include <vector>
 
+#include "Currency/Currency.h"
+#include "Cell/Cell.h"
+#include "Row/Row.h"
+#include "Table/Table.h"
+
 int main() {
+    Cell a;
+    Cell c(a);
     std::string ac = "asfasgga";
     Cell acc(ac);
     Cell vd = acc;
-//    Cell array[] = {acc, vd};
-//    int size = sizeof(array) / sizeof(array[0]);
-//    std::vector<Cell> arr(array, array + size);
     std::vector<Cell> arr;
     arr.push_back(acc);
+    arr.push_back(a);
     arr.push_back(vd);
+    arr.push_back(c);
+    Row new_row(arr);
+    std::vector<Row> row_vect;
+    row_vect.push_back(new_row);
+    Row empty_row;
+    Table table("My table", row_vect);
+    table.add_row(empty_row);
+
+//    std::cout << table.get_rows_count();
 //    std::ifstream file("../table.txt");
 //    std::string a;
 //    file >> a;

@@ -4,6 +4,10 @@ Row::Row(std::vector<Cell> &new_cells) {
     cells = new_cells;
 }
 
+Row::Row(const Row &other) {
+    cells = other.cells;
+}
+
 Row::Row(Row &other) {
     cells = other.cells;
 }
@@ -14,7 +18,7 @@ Row &Row::operator=(Row other) {
 }
 
 void Row::change_cell_content_by_position(unsigned int col_id, std::string new_content) {
-    cells[col_id].change_content(new_content);
+    cells[col_id].change_content(std::move(new_content));
 }
 
 std::string Row::get_cell_content_by_position(unsigned int col_id) const {
