@@ -99,13 +99,22 @@ void Table::load(std::string &file_path) {
 void Table::save(std::string &file_path) const {
     std::ofstream file(file_path);
     if (file.is_open()) {
-
-
+        int n = (int)get_cols_count();
+        for (const Row &row : rows) {
+            for (int i = 0; i < n; i++) {
+                int r_c = (int)row.get_cells_count();
+                if (i < r_c) {
+                    file << row.get_cell_content_by_position(i) << ", ";
+                } else {
+                    file << ", ";
+                }
+            }
+            file << '\n';
+        }
         file.close();
     } else {
         std::cout << "Error: File could not be opened.\n";
     }
-
 }
 
 void Table::print() const {
