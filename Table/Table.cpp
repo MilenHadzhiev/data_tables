@@ -1,12 +1,15 @@
 #include <iostream>
+#include <fstream>
 #include "Table.h"
+#include "../Utils/Utils.h"
+
 
 unsigned int Table::get_longest_column_length(unsigned int col_id) const {
-    int n = (int)rows.size();
+    int n = (int) rows.size();
     int max = 0;
     for (int i = 0; i < n; i++) {
         if (rows[i].get_cell_length(col_id) > max) {
-            max = (int)rows[i].get_cell_length(col_id);
+            max = (int) rows[i].get_cell_length(col_id);
         }
     }
     return max;
@@ -21,6 +24,8 @@ void Table::print_empty_string(unsigned int cell_len) {
 Table::Table() {
     name = "New table";
 }
+
+Table::Table(std::string new_name) : name(std::move(new_name)) {}
 
 Table::Table(std::string new_name, std::vector<Row> new_rows) {
     name = std::move(new_name);
@@ -42,11 +47,63 @@ Table::Table(Table &other) {
     rows = other.rows;
 }
 
-void Table::load(std::ifstream &file) {
+void Table::load(std::string &file_path) {
+    if (!rows.empty()) {
+        std::cout << "Table is already populated.\n";
+        return;
+    }
+    std::ifstream file(file_path);
+    if (file.is_open()) {
+        std::string current_line;
+        int row = 0;
+        while (!(file.eof())) {
+            std::vector<Cell> cells_current_row;
+            while (std::getline(file, current_line)) {
+                row++;
+                std::string current_cell_content;
+                int line_size = (int) current_line.size();
+                if (current_line.empty()) {
+                    cells_current_row.emplace_back();
+                } else {
+                    int column = 0;
+                    for (int i = -1; i < line_size; i++) {
+                        column++;
+                        while (current_line[++i] != ',') {
+                            if (i >= line_size) break;
+                            current_cell_content.push_back(current_line[i]);
+                        }
+                        current_cell_content = remove_whitespace(&current_cell_content);
 
+                        if (!(is_data_valid(current_cell_content))) {
+                            clear();
+                            std::cout << "Error, couldn't load table: row " << row << ", col: " << column << ", "
+                                      << current_cell_content << " is an unknown data type.\n";
+                            return;
+                        }
+                        cells_current_row.emplace_back(current_cell_content);
+                        current_cell_content = "";
+                        i--; // to avoid skipping a char, because i gets incremented twice
+                    }
+                }
+                rows.emplace_back(cells_current_row);
+                cells_current_row.clear();
+            }
+        }
+        file.close();
+    } else {
+        std::cout << "Error: File could not be opened.";
+    }
 }
 
-void Table::save(std::ostream &file) const {
+void Table::save(std::string &file_path) const {
+    std::ofstream file(file_path);
+    if (file.is_open()) {
+
+
+        file.close();
+    } else {
+        std::cout << "Error: File could not be opened.";
+    }
 
 }
 
@@ -57,12 +114,14 @@ void Table::print() const {
         for (unsigned int j = 0; j < columns_count; j++) {
             unsigned int longest_cell_in_current_col = get_longest_column_length(j);
             std::string current_string = rows[i].get_cell_content_by_position(j);
-            if(!(current_string.empty())) {
+            std::cout << ' ';
+            if (!(current_string.empty())) {
                 std::cout << current_string;
                 print_empty_string(longest_cell_in_current_col - current_string.length());
             } else {
                 print_empty_string(longest_cell_in_current_col);
             }
+            std::cout << ' ';
             std::cout << '|';
         }
         std::cout << '\n';
@@ -77,7 +136,17 @@ void Table::sort(unsigned int col_id, sorting_types to_sort) {
 
 }
 
-Table& Table::operator=(Table other) {
+void Table::clear() {
+    int n = (int) rows.size();
+    for (int i = 0; i < n; i++) { // for row in rows
+        int m = (int) rows[i].get_cells_count();
+        for (int j = 0; j < m; j++) { // for cell in row
+            rows[i].change_cell_content_by_position(j, "");
+        }
+    }
+}
+
+Table &Table::operator=(Table other) {
     std::swap(name, other.name);
     std::swap(rows, other.rows);
     return *this;
@@ -111,8 +180,7 @@ std::string Table::get_cell_content_by_id(unsigned int row_id, unsigned int col_
     } else if (rows[row_id - 1].get_cells_count() == 0) return " ";
     else if (row_id > get_rows_count()) {
         throw std::invalid_argument("No such row");
-    }
-    else if (col_id > get_cols_count()) {
+    } else if (col_id > get_cols_count()) {
         throw std::invalid_argument("No such column");
     }
     return rows[row_id - 1].get_cell_content_by_position(col_id - 1);
@@ -122,7 +190,7 @@ int Table::get_cols_count() const {
     if (rows.empty()) {
         return 0;
     }
-    int n = (int)rows.size();
+    int n = (int) rows.size();
     int max = 0;
     for (int i = 0; i < n; i++) {
         if (rows[i].get_cells_count() > max) {
@@ -133,5 +201,5 @@ int Table::get_cols_count() const {
 }
 
 int Table::get_rows_count() const {
-    return (int)rows.size();
+    return (int) rows.size();
 }

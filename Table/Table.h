@@ -21,6 +21,7 @@ class Table {
 
 public:
     Table();
+    Table(std::string new_name);
 
     Table(std::string new_name, std::vector<Row> new_rows);
 
@@ -30,15 +31,17 @@ public:
 
     Table(Table &other);
 
-    void load(std::ifstream &file);
+    void load(std::string &file_path);
 
-    void save(std::ostream &file) const;
+    void save(std::string &file_path) const;
 
     void print() const;
 
     void edit(unsigned int row_id, unsigned int col_id, std::string new_content);
 
     void sort(unsigned int col_id, sorting_types to_sort = ASC);
+
+    void clear();
 
     Table &operator=(Table other);
 
