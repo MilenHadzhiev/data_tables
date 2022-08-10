@@ -31,15 +31,15 @@ int main() {
 //    Table table("My table", row_vect);
 //    table.add_row(empty_row);
 
-    std::string filepath = "../table.txt";
+//    std::string filepath = "../table.txt";
 //    std::ifstream file(filepath);
 //    std::string current;
 //    std::vector<std::string> lines;
 //    lines.reserve(5);
-    Table table_txt;
-    table_txt.load(filepath);
+//    Table table_txt;
+//    table_txt.load(filepath);
 //    std::vector<std::string> cells;
-    table_txt.print();
+//    table_txt.print();
 
     return 0;
 }

@@ -95,6 +95,7 @@ void Table::load(std::string &file_path) {
     }
 }
 
+// TODO
 void Table::save(std::string &file_path) const {
     std::ofstream file(file_path);
     if (file.is_open()) {
@@ -102,7 +103,7 @@ void Table::save(std::string &file_path) const {
 
         file.close();
     } else {
-        std::cout << "Error: File could not be opened.";
+        std::cout << "Error: File could not be opened.\n";
     }
 
 }
@@ -132,6 +133,7 @@ void Table::edit(unsigned int row_id, unsigned int col_id, std::string new_conte
     change_cell_content_by_position(row_id, col_id, new_content);
 }
 
+// TODO
 void Table::sort(unsigned int col_id, sorting_types to_sort) {
 
 }
@@ -158,9 +160,21 @@ void Table::change_name(std::string &new_name) {
 
 void Table::change_cell_content_by_position(unsigned int row_id, unsigned int col_id, std::string new_content) {
     if (rows.empty()) {
-        std::cout << "A cell at row " << row_id << " and col " << col_id << " doesn't exist.";
+        std::cout << "Table not initialized.\n";
+    }
+    else if (row_id > get_rows_count()) {
+        std::cout << "Row doesn't exist.\n";
+    } else if (!(is_data_valid(new_content))) {
+        std::cout << "Invalid data.\n";
+    } else if (col_id > get_cols_count()) {
+        std::cout << "Column doesn't exist.\n";
     } else if (rows[row_id - 1].get_cells_count() == 0) {
-        std::cout << " ";
+        std::vector<Cell> this_row;
+        for (int i = 0; i < col_id - 2; i++) {
+            this_row.emplace_back();
+        }
+        this_row.emplace_back(new_content);
+        rows[row_id] = this_row;
     } else {
         rows[row_id - 1].change_cell_content_by_position(col_id - 1, new_content);
     }
@@ -176,13 +190,12 @@ std::string Table::get_name() const {
 
 std::string Table::get_cell_content_by_id(unsigned int row_id, unsigned int col_id) const {
     if (rows.empty()) {
-        return " ";
-    } else if (rows[row_id - 1].get_cells_count() == 0) return " ";
-    else if (row_id > get_rows_count()) {
-        throw std::invalid_argument("No such row");
+        return "Table is empty.\n";
+    } else if (row_id > get_rows_count()) {
+        return "Row doesn't exist.\n";
     } else if (col_id > get_cols_count()) {
-        throw std::invalid_argument("No such column");
-    }
+        throw std::invalid_argument("Column doesn't exist.\n");
+    } else if (rows[row_id - 1].get_cells_count() == 0) return "\n";
     return rows[row_id - 1].get_cell_content_by_position(col_id - 1);
 }
 
