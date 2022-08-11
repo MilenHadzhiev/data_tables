@@ -30,21 +30,25 @@ Table::Table(std::string new_name) : name(std::move(new_name)) {}
 Table::Table(std::string new_name, std::vector<Row> new_rows) {
     name = std::move(new_name);
     rows = std::move(new_rows);
+    cols_count = get_cols_count();
 }
 
 Table::Table(std::string new_name, Row &first_row) {
     name = std::move(new_name);
     rows.push_back(first_row);
+    cols_count = get_cols_count();
 }
 
 Table::Table(const Table &other) {
     name = other.name;
     rows = other.rows;
+    cols_count = get_cols_count();
 }
 
 Table::Table(Table &other) {
     name = other.name;
     rows = other.rows;
+    cols_count = get_cols_count();
 }
 
 void Table::load(std::string &file_path) {
@@ -90,21 +94,27 @@ void Table::load(std::string &file_path) {
             }
         }
         file.close();
+        cols_count = get_cols_count();
     } else {
         std::cout << "Error: File could not be opened.";
     }
 }
 
-// TODO
+
 void Table::save(std::string &file_path) const {
     std::ofstream file(file_path);
     if (file.is_open()) {
-        int n = (int)get_cols_count();
-        for (const Row &row : rows) {
+        int n = (int) get_cols_count();
+        for (const Row &row: rows) {
             for (int i = 0; i < n; i++) {
-                int r_c = (int)row.get_cells_count();
+                int r_c = (int) row.get_cells_count();
                 if (i < r_c) {
-                    file << row.get_cell_content_by_position(i) << ", ";
+                    std::string current_cell = row.get_cell_content_by_position(i + 1);
+                    if (!(is_int(current_cell) || is_double(current_cell) || is_currency(current_cell))) {
+                        file << '"' << current_cell << "\", ";
+                    } else {
+                        file << row.get_cell_content_by_position(i + 1) << ", ";
+                    }
                 } else {
                     file << ", ";
                 }
@@ -123,7 +133,7 @@ void Table::print() const {
     for (unsigned int i = 0; i < rows_count; i++) {
         for (unsigned int j = 0; j < columns_count; j++) {
             unsigned int longest_cell_in_current_col = get_longest_column_length(j);
-            std::string current_string = rows[i].get_cell_content_by_position(j);
+            std::string current_string = rows[i].get_cell_content_by_position(j + 1);
             std::cout << ' ';
             if (!(current_string.empty())) {
                 std::cout << current_string;
@@ -142,9 +152,52 @@ void Table::edit(unsigned int row_id, unsigned int col_id, std::string new_conte
     change_cell_content_by_position(row_id, col_id, new_content);
 }
 
-// TODO
 void Table::sort(unsigned int col_id, sorting_types to_sort) {
-
+    if (col_id - 1 > cols_count) {
+        std::cout << "There are only " << cols_count << " in the table.\n";
+    } else {
+        std::vector<Row> new_rows;
+        int rows_sorted = 0;
+        int rows_count = get_rows_count();
+        if (to_sort == ASC) {
+            // smallest -> biggest
+            while (rows_sorted < rows_count) {
+                std::string min = rows[0].get_cell_content_by_position(col_id);
+                unsigned int min_row = 0;
+                for (int i = 1; i < get_rows_count(); i++) {
+                    std::string current_cell_content = rows[i].get_cell_content_by_position(col_id);
+                    current_cell_content = remove_whitespace(&current_cell_content);
+                    if (compare_string_to_current(min, current_cell_content) == 1) { // second string is "smaller" according to our rules
+                        min = current_cell_content;
+                        min_row = i;
+                    }
+                }
+                new_rows.push_back(rows[min_row]);
+                delete_row(min_row + 1);
+                rows_sorted++;
+            }
+            rows.clear();
+            rows = new_rows;
+        } else {
+            while(rows_sorted < rows_count) {
+                std::string max = rows[0].get_cell_content_by_position(col_id);
+                unsigned int max_row = 0;
+                for (int i = 1; i < get_rows_count(); i++) {
+                    std::string current_cell_content = rows[i].get_cell_content_by_position(col_id);
+                    current_cell_content = remove_whitespace(&current_cell_content);
+                    if (compare_string_to_current(max, current_cell_content) == 2) { // second string is "bigger"
+                        max = current_cell_content;
+                        max_row = i;
+                    }
+                }
+                new_rows.push_back(rows[max_row]);
+                delete_row(max_row + 1);
+                rows_sorted++;
+            }
+            rows.clear();
+            rows = new_rows;
+        }
+    }
 }
 
 void Table::clear() {
@@ -170,8 +223,7 @@ void Table::change_name(std::string &new_name) {
 void Table::change_cell_content_by_position(unsigned int row_id, unsigned int col_id, std::string new_content) {
     if (rows.empty()) {
         std::cout << "Table not initialized.\n";
-    }
-    else if (row_id > get_rows_count()) {
+    } else if (row_id > get_rows_count()) {
         std::cout << "Row doesn't exist.\n";
     } else if (!(is_data_valid(new_content))) {
         std::cout << "Invalid data.\n";
@@ -183,7 +235,8 @@ void Table::change_cell_content_by_position(unsigned int row_id, unsigned int co
             this_row.emplace_back();
         }
         this_row.emplace_back(new_content);
-        rows[row_id] = this_row;
+        rows[row_id - 1] = this_row;
+
     } else {
         rows[row_id - 1].change_cell_content_by_position(col_id - 1, new_content);
     }
@@ -191,6 +244,10 @@ void Table::change_cell_content_by_position(unsigned int row_id, unsigned int co
 
 void Table::add_row(Row &new_row) {
     rows.push_back(new_row);
+}
+
+void Table::delete_row(unsigned int row_id) {
+    this->rows.erase(rows.begin() + (row_id - 1));
 }
 
 std::string Table::get_name() const {

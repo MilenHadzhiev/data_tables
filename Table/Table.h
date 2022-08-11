@@ -21,6 +21,7 @@ class Table {
 
 public:
     Table();
+
     Table(std::string new_name);
 
     Table(std::string new_name, std::vector<Row> new_rows);
@@ -50,6 +51,8 @@ public:
     void change_cell_content_by_position(unsigned int row_id, unsigned int col_id, std::string new_content);
 
     void add_row(Row &new_row);
+
+    void delete_row(unsigned int row_id);
 
     std::string get_name() const;
 

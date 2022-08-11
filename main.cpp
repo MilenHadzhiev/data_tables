@@ -31,30 +31,19 @@ int main() {
 //    Table table("My table", row_vect);
 //    table.add_row(empty_row);
 //    table.print();
-//    std::string filepath = "..\\Cell\\table.txt";
+    std::string filepath = "../table.txt";
+//    table.save(filepath);
 //    std::ifstream file(filepath);
 //    if (file.is_open()){
 //        std::cout << "AFfasd";
 //        file.close();
 //    }
 //    table.save(filepath);
-//    Table table_txt;
-    std::string s1 = "34";
-    std::string s2 = "234";
-    std::string s3 = "52.34";
-    std::string s4 = "$12.34";
-    std::string s5 = "EUR 12.34";
-    std::string s6 = "EUR12.34";
-    std::string s7 = "BGN25.34";
-
-    std::string s8 = "afs";
-    std::cout << compare_string_to_current(s8, s1) << std::endl; //2
-    std::cout << compare_string_to_current(s8, s2) << std::endl; //2
-    std::cout << compare_string_to_current(s8, s3) << std::endl; //2
-    std::cout << compare_string_to_current(s8, s4) << std::endl; //2
-    std::cout << compare_string_to_current(s8, s5) << std::endl; //2
-    std::cout << compare_string_to_current(s8, s6) << std::endl; //2
-    std::cout << compare_string_to_current(s8, s7) << std::endl; //2
-    std::cout << compare_string_to_current(s8, s8) << std::endl; //2
+    Table table_txt;
+    table_txt.load(filepath);
+    table_txt.print();
+    table_txt.sort(2, ASC);
+    std::cout << std::endl;
+    table_txt.print();
     return 0;
 }
