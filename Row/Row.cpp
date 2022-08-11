@@ -18,13 +18,20 @@ Row &Row::operator=(Row other) {
 }
 
 void Row::change_cell_content_by_position(unsigned int col_id, std::string new_content) {
-    cells[col_id].change_content(std::move(new_content));
+    int s = (int)get_cells_count();
+    if (col_id > s) {
+        for(int i = s; i < col_id - 1; i++) {
+            cells.emplace_back();
+        }
+        cells.emplace_back(new_content);
+    }
+    cells[col_id - 1].change_content(std::move(new_content));
 }
 
 std::string Row::get_cell_content_by_position(unsigned int col_id) const {
     // pass column id ranging from 0 to n, where n = cells.size() // the amount of cells
-    if (col_id < cells.size()) {
-        return cells[col_id].get_content();
+    if (col_id <= cells.size()) {
+        return cells[col_id - 1].get_content();
     }
     return "";
 }

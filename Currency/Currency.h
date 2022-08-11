@@ -3,9 +3,6 @@
 
 int str_len(const char *s);
 
-// USD 1 = BGN 1.92
-// EUR 1 = BGN 1.96
-
 enum currency_type {
     BGN, EUR, USD
 };
