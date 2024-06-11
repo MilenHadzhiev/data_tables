@@ -1,10 +1,10 @@
-# data_tables
+# ***data_tables***
 FMI Object-oriented programming course final project
+<br>
+### Notes
+ - Use $ for dollars, but BGN and EUR for leva and euros respectively
+ - Use dots - for floating point sign
 
-<br>
-<br>
-<br>
-<br>
-
-#### Note 
-<br>Use $ for dollars, but BGN and EUR for leva and euros respectively
+# ***TODO***
+ - add unit tests
+ - add a demo
