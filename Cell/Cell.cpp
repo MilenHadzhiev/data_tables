@@ -29,8 +29,10 @@ std::string Cell::get_content() const {
     return content;
 }
 
-Cell& Cell::operator=(Cell other) {
-    std::swap(content, other.content);
+Cell& Cell::operator=(const Cell& other) {
+    if (this != &other) {
+        content = other.content;
+    }
     return *this;
 }
 

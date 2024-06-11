@@ -28,7 +28,7 @@ public:
 
     Cell(Cell &&other);
 
-    Cell &operator=(Cell other);
+    Cell &operator=(const Cell& other);
 
     void change_content(std::string new_content);
 

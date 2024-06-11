@@ -15,7 +15,7 @@ public:
 
     Row(Row &other);
 
-    Row &operator=(Row other);
+    Row &operator=(const Row& other);
 
     void change_cell_content_by_position(unsigned int col_id, std::string new_content);
 

@@ -3,6 +3,7 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <cmath>
 #include "../Cell/Cell.h"
 #include "../Row/Row.h"
 #include "../Utils/Utils.h"
@@ -15,7 +16,7 @@ enum sorting_types {
 };
 
 class Table {
-    std::string name;
+    std::string file_name;
     std::vector<Row> rows;
     int cols_count = get_cols_count();
     static const std::unordered_map<char, unsigned short> operators;
@@ -24,8 +25,6 @@ class Table {
 
     unsigned int get_longest_column_length(unsigned int col_id) const;
 
-//    void sort_asending(unsigned int col_id, unsigned int rows_count);
-//    void sort_descending(unsigned int col_id, unsigned int rows_count);
     std::vector<std::string> convert_infix_to_potfix_notation(const std::string& content) const;
 
     void merge(sorting_types to_sort, unsigned int col_id,int left, int mid, int right);
@@ -47,7 +46,9 @@ public:
 
     void load(std::string &file_path);
 
-    void save(std::string &file_path) const;
+    void save() const;
+
+    void save_as(const std::string &file_path) const;
 
     void print() const;
 

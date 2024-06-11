@@ -56,6 +56,8 @@ bool is_string(const std::string &s) {
     if (s[0] == '"' && s[s.size() - 1] == '"') {
         return true;
     }
+    for (const char& ch : s)
+        if (!std::isdigit(ch)) return true;
     return false;
 }
 

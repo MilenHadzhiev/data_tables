@@ -33,13 +33,13 @@ int main() {
 //    table.add_row(empty_row);
 //    table.print();
     std::string filepath = "../table.txt";
-//    table.save(filepath);
+//    table.save_as(filepath);
 //    std::ifstream file(filepath);
 //    if (file.is_open()){
 //        std::cout << "AFfasd";
 //        file.close();
 //    }
-//    table.save(filepath);
+//    table.save_as(filepath);
     Table table_txt;
     table_txt.load(filepath);
     table_txt.print();
@@ -51,6 +51,9 @@ int main() {
     std::cout<< '\n';
     table_txt.sort(3, DESC);
     table_txt.print();
+    table_txt.edit(1, 5, "=R2C4^2+R2C3-R3C6*R3C1+R3C1^R3C1");
+    std::cout << "R1C5: " << table_txt.get_cell_content(1, 5);
+    table_txt.save_as(filepath);
 //    table_txt.edit/
 //    double a = std::stod("122345.678");
 //    std::cout << a;

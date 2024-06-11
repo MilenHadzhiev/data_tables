@@ -12,8 +12,8 @@ Row::Row(Row &other) {
     cells = other.cells;
 }
 
-Row &Row::operator=(Row other) {
-    std::swap(cells, other.cells);
+Row &Row::operator=(const Row& other) {
+    cells = other.cells;
     return *this;
 }
 
@@ -25,7 +25,7 @@ void Row::change_cell_content_by_position(unsigned int col_id, std::string new_c
         }
         cells.emplace_back(new_content);
     }
-    cells[col_id - 1].change_content(std::move(new_content));
+    cells[col_id - 1].change_content(new_content);
 }
 
 std::string Row::get_cell_content_by_position(unsigned int col_id) const {

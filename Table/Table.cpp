@@ -20,31 +20,31 @@ void Table::print_empty_string(unsigned int cell_len) {
 }
 
 Table::Table() {
-    name = "New table";
+    file_name = "New table";
 }
 
-Table::Table(std::string new_name) : name(std::move(new_name)) {}
+Table::Table(std::string new_name) : file_name(std::move(new_name)) {}
 
 Table::Table(std::string new_name, std::vector<Row> new_rows) {
-    name = std::move(new_name);
+    file_name = std::move(new_name);
     rows = std::move(new_rows);
     cols_count = get_cols_count();
 }
 
 Table::Table(std::string new_name, Row &first_row) {
-    name = std::move(new_name);
+    file_name = std::move(new_name);
     rows.push_back(first_row);
     cols_count = get_cols_count();
 }
 
 Table::Table(const Table &other) {
-    name = other.name;
+    file_name = other.file_name;
     rows = other.rows;
     cols_count = get_cols_count();
 }
 
 Table::Table(Table &other) {
-    name = other.name;
+    file_name = other.file_name;
     rows = other.rows;
     cols_count = get_cols_count();
 }
@@ -98,8 +98,11 @@ void Table::load(std::string &file_path) {
     }
 }
 
+void Table::save() const {
+    save_as(file_name);
+}
 
-void Table::save(std::string &file_path) const {
+void Table::save_as(const std::string &file_path) const {
     std::ofstream file(file_path);
     if (file.is_open()) {
         int n = (int) get_cols_count();
@@ -121,17 +124,16 @@ void Table::save(std::string &file_path) const {
         }
         file.close();
     } else {
-        std::cout << "Error: File could not be opened.\n";
+        std::cout << "Error: File could not be opened to save data table.\n";
     }
 }
-
 
 std::string Table::calculate_formula_result(const std::string &content) const {
     std::vector<std::string> postfix_notation = convert_infix_to_potfix_notation(content);
     std::stack<double> st;
     for (int i = 0; i < postfix_notation.size(); ++i) {
         if (postfix_notation[i] != "+" && postfix_notation[i] != "-" && postfix_notation[i] != "/"
-            && postfix_notation[i] != "*") {
+            && postfix_notation[i] != "*" && postfix_notation[i] != "^") {
             st.push(get_string_numeric_value(postfix_notation[i]));
         } else {
             double b = st.top();
@@ -144,6 +146,8 @@ std::string Table::calculate_formula_result(const std::string &content) const {
                 st.push(a - b);
             else if (postfix_notation[i] == "*")
                 st.push(a * b);
+            else if (postfix_notation[i] == "^")
+                st.push(pow(a, b));
             else
                 try {
                     st.push(a / b);
@@ -183,8 +187,8 @@ std::vector<std::string> Table::convert_infix_to_potfix_notation(const std::stri
                 } catch (std::exception) {
                     result.push_back("0");
                 }
-            } else {
-                std::string res;
+            } else {  // we have a number
+                std::string res(1, symbol);
                 while (operators.find(content[i]) == operators.end()) {
                     res += content[i++];
                 }
@@ -359,24 +363,24 @@ void Table::clear() {
 }
 
 Table &Table::operator=(Table other) {
-    std::swap(name, other.name);
+    std::swap(file_name, other.file_name);
     std::swap(rows, other.rows);
     return *this;
 }
 
 void Table::change_name(std::string &new_name) {
-    name = new_name;
+    file_name = new_name;
 }
 
 void Table::change_cell_content_by_position(unsigned int row_id, unsigned int col_id, std::string new_content) {
     if (rows.empty()) {
         std::cout << "Table not initialized.\n";
-    } else if (row_id > get_rows_count()) {
+    } else if (row_id >= get_rows_count()) {
         std::cout << "Row doesn't exist.\n";
+    } else if (col_id >= get_cols_count()) {
+        std::cout << "Column doesn't exist.\n";
     } else if (Cell::get_data_datatype(new_content) == UnknownDataType) {
         std::cout << "Unsupported data type.\n";
-    } else if (col_id > get_cols_count()) {
-        std::cout << "Column doesn't exist.\n";
     } else if (rows[row_id - 1].get_cells_count() == 0) {
         std::vector<Cell> this_row;
         for (int i = 0; i < col_id - 2; i++) {
@@ -386,7 +390,7 @@ void Table::change_cell_content_by_position(unsigned int row_id, unsigned int co
         rows[row_id - 1] = this_row;
 
     } else {
-        rows[row_id - 1].change_cell_content_by_position(col_id - 1, new_content);
+        rows[row_id - 1].change_cell_content_by_position(col_id, new_content);
     }
 }
 
@@ -399,7 +403,7 @@ void Table::delete_row(unsigned int row_id) {
 }
 
 std::string Table::get_name() const {
-    return name;
+    return file_name;
 }
 
 std::string Table::get_cell_content(unsigned int row_id, unsigned int col_id) const {
@@ -482,7 +486,7 @@ unsigned short Table::compare_strings(const std::string &s1, const std::string &
 }
 
 double Table::get_string_numeric_value(const std::string &s) {
-    if (is_string(s)) return 0;
+    if (s.empty()) return 0;
     if (is_double(s) || is_int(s)) return std::stod(s);
     int n = (int) s.size();
     std::string new_s;
@@ -493,6 +497,7 @@ double Table::get_string_numeric_value(const std::string &s) {
             }
         }
     }
+    if (is_string(s)) return 0;
     new_s = remove_whitespace(&new_s);
     if (new_s == "") {
         return 0;
