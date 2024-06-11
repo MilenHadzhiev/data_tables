@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# others
+Приложение за работа с електронни таблици.docx
+table.txt
+data_tables_docs.docx
+data_tables.zip
