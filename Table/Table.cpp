@@ -1,8 +1,6 @@
-#include <iostream>
-#include <fstream>
 #include "Table.h"
-#include "../Utils/Utils.h"
 
+const std::unordered_map<char, unsigned short> Table::operators = {{'^', 2}, { '*', 1 }, { '/', 1 }, { '+', 0 }, { '-', 0 }};
 
 unsigned int Table::get_longest_column_length(unsigned int col_id) const {
     int n = (int) rows.size();
@@ -78,7 +76,7 @@ void Table::load(std::string &file_path) {
                         }
                         current_cell_content = remove_whitespace(&current_cell_content);
 
-                        if (!(is_data_valid(current_cell_content))) {
+                        if (Cell::get_data_datatype(current_cell_content) == UnknownDataType) {
                             clear();
                             std::cout << "Error, couldn't load table: row " << row << ", col: " << column << ", "
                                       << current_cell_content << " is an unknown data type.\n";
@@ -127,6 +125,102 @@ void Table::save(std::string &file_path) const {
     }
 }
 
+
+std::string Table::calculate_formula_result(const std::string &content) const {
+    std::vector<std::string> postfix_notation = convert_infix_to_potfix_notation(content);
+    std::stack<double> st;
+    for (int i = 0; i < postfix_notation.size(); ++i) {
+        if (postfix_notation[i] != "+" && postfix_notation[i] != "-" && postfix_notation[i] != "/"
+            && postfix_notation[i] != "*") {
+            st.push(get_string_numeric_value(postfix_notation[i]));
+        } else {
+            double b = st.top();
+            st.pop();
+            double a = st.top();
+            st.pop();
+            if (postfix_notation[i] == "+")
+                st.push(a + b);
+            else if (postfix_notation[i] == "-")
+                st.push(a - b);
+            else if (postfix_notation[i] == "*")
+                st.push(a * b);
+            else
+                try {
+                    st.push(a / b);
+                }
+                catch (std::exception &e) {
+                    std::cout << "ERROR";
+                    throw e;
+                }
+        }
+    }
+    return std::to_string(st.top());
+}
+
+std::vector<std::string> Table::convert_infix_to_potfix_notation(const std::string &content) const {
+    std::vector<std::string> result;
+    std::stack<char> seen_operators;
+    unsigned int i = 1;  // content[0] is =
+
+    while (i < content.size()) {
+        char symbol = content[i++];
+        if (operators.find(symbol) == operators.end()) {  // means the symbol is a number/cell
+            if (symbol == 'R') { // current element of the formula is a ref to another cell
+                try {
+                    std::string cell_row;
+                    std::string cell_col;
+                    while (content[i] != 'C') {
+                        cell_row += content[i++];
+                    }
+                    int row = convert_to_int(cell_row);
+                    i++; // to skip the C;
+                    while (int(content[i]) > 47 && content[i] < 58) {
+                        cell_col += content[i++];
+                    }
+                    int col = convert_to_int(cell_col);
+
+                    result.push_back(get_cell_content(row, col));
+                } catch (std::exception) {
+                    result.push_back("0");
+                }
+            } else {
+                std::string res;
+                while (operators.find(content[i]) == operators.end()) {
+                    res += content[i++];
+                }
+                result.push_back(res); // res is just an int/float
+            }
+        } else if (seen_operators.empty()) {
+            seen_operators.push(symbol);
+        } else {
+            unsigned short current_element_weight;
+            unsigned short stack_element_weight;
+            current_element_weight = operators.at(symbol);
+            stack_element_weight = operators.at(seen_operators.top());
+//            access_map_element(operators, symbol, current_element_weight);
+//            access_map_element(operators, seen_operators.top(), stack_element_weight);
+
+            while (current_element_weight <= stack_element_weight && !seen_operators.empty()) {
+                std::string stack_top(1, seen_operators.top());
+                result.push_back(stack_top);
+                seen_operators.pop();
+                if (!seen_operators.empty()) {
+                    stack_element_weight = operators.at(seen_operators.top());
+//                    access_map_element(operators, seen_operators.top(), stack_element_weight);
+                }
+            }
+            seen_operators.push(symbol);
+        }
+    }
+    while (!seen_operators.empty()) {
+        std::string stack_top(1, seen_operators.top());
+        result.emplace_back(stack_top);
+        seen_operators.pop();
+    }
+    return result;
+}
+
+
 void Table::print() const {
     unsigned int columns_count = get_cols_count();
     unsigned int rows_count = get_rows_count();
@@ -152,52 +246,106 @@ void Table::edit(unsigned int row_id, unsigned int col_id, std::string new_conte
     change_cell_content_by_position(row_id, col_id, new_content);
 }
 
+//void Table::sort_asending(unsigned int col_id, unsigned int rows_count) {
+//    // smallest -> biggest
+//    std::vector<Row> new_rows;
+//    unsigned int rows_sorted = 0;
+//    while (rows_sorted < rows_count) {
+//        std::string min = rows[0].get_cell_content_by_position(col_id);
+//        unsigned int min_row = 0;
+//        for (int i = 1; i < get_rows_count(); i++) {
+//            std::string current_cell_content = rows[i].get_cell_content_by_position(col_id);
+//            remove_whitespace(&current_cell_content);
+//            if (compare_strings(*this, min, current_cell_content) == 1) { // second string is "smaller" according to our rules
+//                min = current_cell_content;
+//                min_row = i;
+//            }
+//        }
+//
+//        new_rows.push_back(rows[min_row]);
+//        delete_row(min_row + 1);
+//        rows_sorted++;
+//    }
+//    rows.clear();
+//    rows = new_rows;
+//}
+//
+//void Table::sort_descending(unsigned int col_id, unsigned int rows_count) {
+//    std::vector<Row> new_rows;
+//    unsigned int rows_sorted = 0;
+//    while (rows_sorted < rows_count) {
+//        std::string max = rows[0].get_cell_content_by_position(col_id);
+//        unsigned int max_row = 0;
+//        for (int i = 1; i < get_rows_count(); i++) {
+//            std::string current_cell_content = rows[i].get_cell_content_by_position(col_id);
+//            current_cell_content = remove_whitespace(&current_cell_content);
+//            if (compare_strings(max, current_cell_content) == 2) { // second string is "bigger"
+//                max = current_cell_content;
+//                max_row = i;
+//            }
+//        }
+//        new_rows.push_back(rows[max_row]);
+//        delete_row(max_row + 1);
+//        rows_sorted++;
+//    }
+//    rows.clear();
+//    rows = new_rows;
+//
+//}
+
+
+void Table::merge(sorting_types to_sort, const unsigned int col_id, const int left, const int mid, const int right) {
+    const int left_sub_array_size = mid - left + 1;
+    const int right_sub_array_size = right - mid;
+
+    std::vector<std::string> left_sub_array;
+    std::vector<std::string> right_sub_array;
+    for (unsigned int i = 0; i < left_sub_array_size; ++i)
+        left_sub_array.push_back(rows[left + i].get_cell_content_by_position(col_id));
+
+    for (unsigned int i = 0; i < right_sub_array_size; ++i)
+        right_sub_array.push_back(rows[mid + 1 + i].get_cell_content_by_position(col_id));
+
+    int left_sub_array_idx = 0, right_sub_array_idx = 0;
+    int merged_array_idx = left;
+
+    while (left_sub_array_idx < left_sub_array_size && right_sub_array_idx < right_sub_array_size) {
+        if ((to_sort == DESC && compare_strings(left_sub_array[left_sub_array_idx], right_sub_array[right_sub_array_idx]) == 1) ||
+            (to_sort == ASC && compare_strings(right_sub_array[right_sub_array_idx], left_sub_array[left_sub_array_idx]) == 1))
+            rows[merged_array_idx].change_cell_content_by_position(col_id, left_sub_array[left_sub_array_idx++]);
+        else
+            rows[merged_array_idx].change_cell_content_by_position(col_id, right_sub_array[right_sub_array_idx++]);
+
+        merged_array_idx++;
+    }
+
+    while (left_sub_array_idx < left_sub_array_size)
+        rows[merged_array_idx++].change_cell_content_by_position(col_id, left_sub_array[left_sub_array_idx++]);
+
+    while (right_sub_array_idx < right_sub_array_size)
+        rows[merged_array_idx++].change_cell_content_by_position(col_id, right_sub_array[right_sub_array_idx++]);
+}
+
+void Table::mergesort(sorting_types to_sort, const unsigned int col_id, const int start, const int end) {
+    if (start >= end) return;
+
+    int middle = start + (end - start) / 2;
+    mergesort(to_sort, col_id, start, middle);
+    mergesort(to_sort, col_id, middle + 1, end);
+    merge(to_sort, col_id, start, middle, end);
+}
+
 void Table::sort(unsigned int col_id, sorting_types to_sort) {
     if (col_id - 1 > cols_count) {
-        std::cout << "There are only " << cols_count << " in the table.\n";
-    } else {
-        std::vector<Row> new_rows;
-        int rows_sorted = 0;
-        int rows_count = get_rows_count();
-        if (to_sort == ASC) {
-            // smallest -> biggest
-            while (rows_sorted < rows_count) {
-                std::string min = rows[0].get_cell_content_by_position(col_id);
-                unsigned int min_row = 0;
-                for (int i = 1; i < get_rows_count(); i++) {
-                    std::string current_cell_content = rows[i].get_cell_content_by_position(col_id);
-                    current_cell_content = remove_whitespace(&current_cell_content);
-                    if (compare_string_to_current(min, current_cell_content) == 1) { // second string is "smaller" according to our rules
-                        min = current_cell_content;
-                        min_row = i;
-                    }
-                }
-                new_rows.push_back(rows[min_row]);
-                delete_row(min_row + 1);
-                rows_sorted++;
-            }
-            rows.clear();
-            rows = new_rows;
-        } else {
-            while(rows_sorted < rows_count) {
-                std::string max = rows[0].get_cell_content_by_position(col_id);
-                unsigned int max_row = 0;
-                for (int i = 1; i < get_rows_count(); i++) {
-                    std::string current_cell_content = rows[i].get_cell_content_by_position(col_id);
-                    current_cell_content = remove_whitespace(&current_cell_content);
-                    if (compare_string_to_current(max, current_cell_content) == 2) { // second string is "bigger"
-                        max = current_cell_content;
-                        max_row = i;
-                    }
-                }
-                new_rows.push_back(rows[max_row]);
-                delete_row(max_row + 1);
-                rows_sorted++;
-            }
-            rows.clear();
-            rows = new_rows;
-        }
+        std::cout << "There are only " << cols_count << " columns in the table.\n";
+        return;
     }
+    mergesort(to_sort, col_id, 0, rows.size() - 1);
+//    if (to_sort == ASC) {
+//        sort_asending(col_id, get_rows_count());
+//    } else {
+//        sort_descending(col_id, get_rows_count());
+//    }
 }
 
 void Table::clear() {
@@ -225,8 +373,8 @@ void Table::change_cell_content_by_position(unsigned int row_id, unsigned int co
         std::cout << "Table not initialized.\n";
     } else if (row_id > get_rows_count()) {
         std::cout << "Row doesn't exist.\n";
-    } else if (!(is_data_valid(new_content))) {
-        std::cout << "Invalid data.\n";
+    } else if (Cell::get_data_datatype(new_content) == UnknownDataType) {
+        std::cout << "Unsupported data type.\n";
     } else if (col_id > get_cols_count()) {
         std::cout << "Column doesn't exist.\n";
     } else if (rows[row_id - 1].get_cells_count() == 0) {
@@ -254,15 +402,16 @@ std::string Table::get_name() const {
     return name;
 }
 
-std::string Table::get_cell_content_by_id(unsigned int row_id, unsigned int col_id) const {
+std::string Table::get_cell_content(unsigned int row_id, unsigned int col_id) const {
     if (rows.empty()) {
         return "Table is empty.\n";
     } else if (row_id > get_rows_count()) {
-        return "Row doesn't exist.\n";
+        throw std::invalid_argument("Row doesn't exist.\n");
     } else if (col_id > get_cols_count()) {
         throw std::invalid_argument("Column doesn't exist.\n");
     } else if (rows[row_id - 1].get_cells_count() == 0) return "\n";
-    return rows[row_id - 1].get_cell_content_by_position(col_id - 1);
+    std::string cell_content = rows[row_id - 1].get_cell_content_by_position(col_id);
+    return cell_content[0] == '=' ? calculate_formula_result(cell_content) : cell_content;
 }
 
 int Table::get_cols_count() const {
@@ -281,4 +430,72 @@ int Table::get_cols_count() const {
 
 int Table::get_rows_count() const {
     return (int) rows.size();
+}
+
+unsigned short Table::compare_strings(const std::string &s1, const std::string &s2) const {
+    // return 1 if s1 is bigger, 2 if s2 is bigger
+    // s1 is the current min/max
+    // s2 is the candidate for min/max
+    std::string s1_to_use_for_comparison;
+    std::string s2_to_use_for_comparison;
+    if (s1[0] == '=') s1_to_use_for_comparison = this->calculate_formula_result(s1);
+    else s1_to_use_for_comparison = s1;
+
+    if (s2[0] == '=') s2_to_use_for_comparison = this->calculate_formula_result(s2);
+    else s2_to_use_for_comparison = s2;
+
+    if (is_int(s1_to_use_for_comparison) || is_double(s1_to_use_for_comparison)) {
+        if (is_int(s2_to_use_for_comparison) || is_double(s2_to_use_for_comparison)) {
+            return stod(s1_to_use_for_comparison) >= stod(s2_to_use_for_comparison) ? 1 : 2;
+        }
+        if (is_currency(s2_to_use_for_comparison)) {
+            double s2_value_bgn = get_currency_value_in_BGN(get_currency_type(s2_to_use_for_comparison), get_string_numeric_value(s2_to_use_for_comparison));
+            return std::stod(s1_to_use_for_comparison) >= s2_value_bgn ? 1 : 2;
+        }
+        // only case left when s2 is string that can't be converted to int/double/currency ie actual string
+        unsigned short s2_value = 0;
+        return std::stod(s1_to_use_for_comparison) >= s2_value ? 1 : 2;
+    }
+    if (is_currency(s1_to_use_for_comparison)) {
+        double s1_value_bgn = get_currency_value_in_BGN(get_currency_type(s1_to_use_for_comparison), get_string_numeric_value(s1_to_use_for_comparison));
+        if (is_int(s2_to_use_for_comparison) || is_double(s2_to_use_for_comparison)) {
+            return s1_value_bgn > std::stod(s2_to_use_for_comparison) ? 1 : 2;
+        }
+        if (is_currency(s2)) {
+            double s2_value_bgn = get_currency_value_in_BGN(get_currency_type(s2_to_use_for_comparison), get_string_numeric_value(s2_to_use_for_comparison));
+            return s1_value_bgn >= s2_value_bgn ? 1 : 2;
+        }
+        unsigned short s2_value = 0;
+        return s1_value_bgn >= s2_value ? 1 : 2;
+    }
+    // only case left when s1 is string that can't be converted to int/double/currency ie actual string
+    unsigned short s1_value = 0;
+    if (is_int(s2_to_use_for_comparison) || is_double(s2_to_use_for_comparison)) {
+        return s1_value >= std::stod(s2_to_use_for_comparison) ? 1 : 2;
+    }
+    if (is_currency(s2_to_use_for_comparison)) {
+        double s2_value_bgn = get_currency_value_in_BGN(get_currency_type(s2_to_use_for_comparison), get_string_numeric_value(s2_to_use_for_comparison));
+        return s1_value >= s2_value_bgn ? 1 : 2;
+    }
+    // both s1 and s2 are strings that can't be converted to int/double/currency ie actual strings => both will evaluate to 0
+    return 1;
+}
+
+double Table::get_string_numeric_value(const std::string &s) {
+    if (is_string(s)) return 0;
+    if (is_double(s) || is_int(s)) return std::stod(s);
+    int n = (int) s.size();
+    std::string new_s;
+    if (is_currency(s)) {
+        for (const char& current : s) {
+            if (std::isdigit(current) || current == '.') {
+                new_s += current;
+            }
+        }
+    }
+    new_s = remove_whitespace(&new_s);
+    if (new_s == "") {
+        return 0;
+    }
+    return std::stod(new_s);
 }

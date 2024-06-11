@@ -1,12 +1,9 @@
+#include <iostream>
+#include <cstring>
+#include "../Utils/Utils.h"
+
 #ifndef DATA_TABLES_CURRENCY_H
 #define DATA_TABLES_CURRENCY_H
-
-int str_len(const char *s);
-
-enum currency_type {
-    BGN, EUR, USD
-};
-
 
 class Currency {
     int money;

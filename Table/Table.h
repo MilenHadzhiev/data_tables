@@ -1,3 +1,12 @@
+#include <iostream>
+#include <fstream>
+#include <stack>
+#include <string>
+#include <vector>
+#include "../Cell/Cell.h"
+#include "../Row/Row.h"
+#include "../Utils/Utils.h"
+
 #ifndef DATA_TABLES_TABLE_H
 #define DATA_TABLES_TABLE_H
 
@@ -5,20 +14,24 @@ enum sorting_types {
     ASC, DESC
 };
 
-#include <string>
-#include <vector>
-#include "../Cell/Cell.h"
-#include "../Row/Row.h"
-
 class Table {
     std::string name;
     std::vector<Row> rows;
     int cols_count = get_cols_count();
+    static const std::unordered_map<char, unsigned short> operators;
 
     static void print_empty_string(unsigned int cell_len);
 
     unsigned int get_longest_column_length(unsigned int col_id) const;
 
+//    void sort_asending(unsigned int col_id, unsigned int rows_count);
+//    void sort_descending(unsigned int col_id, unsigned int rows_count);
+    std::vector<std::string> convert_infix_to_potfix_notation(const std::string& content) const;
+
+    void merge(sorting_types to_sort, unsigned int col_id,int left, int mid, int right);
+    void mergesort(sorting_types to_sort, unsigned int col_id, int start, int end);
+    unsigned short compare_strings(const std::string &s1, const std::string &s2) const;
+    static double get_string_numeric_value(const std::string &s);
 public:
     Table();
 
@@ -46,6 +59,8 @@ public:
 
     Table &operator=(Table other);
 
+    std::string calculate_formula_result(const std::string& content) const;
+
     void change_name(std::string &new_name);
 
     void change_cell_content_by_position(unsigned int row_id, unsigned int col_id, std::string new_content);
@@ -56,7 +71,7 @@ public:
 
     std::string get_name() const;
 
-    std::string get_cell_content_by_id(unsigned int row_id, unsigned int col_id) const;
+    std::string get_cell_content(unsigned int row_id, unsigned int col_id) const;
 
     int get_cols_count() const;
 

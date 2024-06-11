@@ -1,8 +1,8 @@
-#ifndef DATA_TABLES_ROW_H
-#define DATA_TABLES_ROW_H
-
 #include "../Cell/Cell.h"
 #include <vector>
+
+#ifndef DATA_TABLES_ROW_H
+#define DATA_TABLES_ROW_H
 
 class Row {
     std::vector<Cell> cells;

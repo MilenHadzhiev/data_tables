@@ -2,6 +2,7 @@
 #include <cstring>
 #include <fstream>
 #include <vector>
+#include <stack>
 #include "Currency/Currency.h"
 #include "Cell/Cell.h"
 #include "Row/Row.h"
@@ -42,8 +43,16 @@ int main() {
     Table table_txt;
     table_txt.load(filepath);
     table_txt.print();
-    table_txt.sort(2, ASC);
+    std::string a = table_txt.get_cell_content(1, 2);
+    std::cout << "formula reslt: " << a;
+    table_txt.sort(2, DESC);
     std::cout << std::endl;
     table_txt.print();
+    std::cout<< '\n';
+    table_txt.sort(3, DESC);
+    table_txt.print();
+//    table_txt.edit/
+//    double a = std::stod("122345.678");
+//    std::cout << a;
     return 0;
 }

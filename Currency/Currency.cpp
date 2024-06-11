@@ -1,6 +1,4 @@
 #include "Currency.h"
-#include <iostream>
-#include <cstring>
 
 Currency::Currency(int new_money, currency_type new_type) {
     money = new_money;
@@ -65,11 +63,7 @@ const char *Currency::get_symbol() const {
 }
 
 void Currency::convert_to_BGN() {
-    if (currency == EUR) {
-        money *= 1.96;
-    } else if (currency == USD) {
-        money *= 1.92;
-    }
+    money = get_currency_value_in_BGN(currency, money);
     currency = BGN;
 }
 
@@ -78,13 +72,13 @@ void Currency::change_money(int new_money) {
 }
 
 bool Currency::operator==(const Currency &other) const {
-    return money == other.get_money();
+    return get_currency_value_in_BGN(currency, money) == get_currency_value_in_BGN(other.currency, other.money);
 }
 
 bool Currency::operator<=(const Currency &other) const {
-    return money <= other.get_money();
+    return get_currency_value_in_BGN(currency, money) <= get_currency_value_in_BGN(other.currency, other.money);
 }
 
 bool Currency::operator>=(const Currency &other) const {
-    return money >= other.get_money();
+    return get_currency_value_in_BGN(currency, money) >= get_currency_value_in_BGN(other.currency, other.money);
 }
