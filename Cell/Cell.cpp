@@ -15,7 +15,7 @@ Cell::Cell(const Cell &other) : content(other.content), cell_type(other.cell_typ
 
 Cell::Cell(Cell &other) : content(other.content), cell_type(other.cell_type) {}
 
-Cell::Cell(Cell &&other) : content(other.content), cell_type(other.cell_type) {}
+Cell::Cell(Cell &&other) : content(std::move(other.content)), cell_type(std::move(other.cell_type)) {}
 
 void Cell::assign_cell_type(const std::string& new_content) {
     if (is_int(new_content)) cell_type = Integer;

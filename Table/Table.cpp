@@ -45,12 +45,37 @@ Table::Table(Table &other) {
     rows = other.rows;
 }
 
+Table::Table(Table &&other) {
+    file_name = std::move(other.file_name);
+    rows = std::move(other.rows);
+}
+
+
 bool Table::is_table_loaded() const {
     return file_name != "" || get_rows_count() != 0;
 }
 
+void Table::check_inconsistency(const std::string& currently_read_line) {
+    unsigned long long int current_line_size = count_cells_from_row(currently_read_line);
+    for (unsigned int i = 0; i < rows.size(); ++i) {
+        if (rows[i].get_cells_count() != current_line_size) {
+            clear();
+            throw MissingCommaError(rows.size() + 1, current_line_size);
+        }
+    }
+}
 
-void Table::load(std::string &file_path) {
+unsigned long long int Table::count_cells_from_row(const std::string& row_as_string) {
+    unsigned long long int res = 0;
+    for (const char& ch : row_as_string) {
+        if (ch == ',') {
+            res++;
+        }
+    }
+    return res++;
+}
+
+void Table::load(const std::string &file_path) {
     if (!rows.empty()) {
         std::cout << "Table is already populated. Close current table and try again\n";
         return;
@@ -66,6 +91,7 @@ void Table::load(std::string &file_path) {
                 row++;
                 std::string current_cell_content;
                 int line_size = (int) current_line.size();
+//                check_inconsistency(current_line); TODO: fix
                 if (current_line.empty()) {
                     cells_current_row.emplace_back();
                 } else {
@@ -80,9 +106,7 @@ void Table::load(std::string &file_path) {
 
                         if (Cell::get_data_datatype(current_cell_content) == UnknownDataType) {
                             clear();
-                            std::cout << "Error, couldn't load table: row " << row << ", col: " << column << ", "
-                                      << current_cell_content << " is an unknown data type.\n";
-                            return;
+                            throw UnknownDataTypeError(rows.size(), cells_current_row.size(), current_cell_content);
                         }
                         cells_current_row.emplace_back(current_cell_content);
                         current_cell_content = "";

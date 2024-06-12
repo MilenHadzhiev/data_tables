@@ -66,23 +66,6 @@ int main() {
             std::cout << "Unknown exception occurred: " << e.what();
         }
     }
-//    Cell a;
-//    Cell c(a);
-//    std::string ac = "asfasgga";
-//    Cell acc(ac);
-//    Cell vd = acc;
-//    std::vector<Cell> arr;
-//    arr.push_back(acc);
-//    arr.push_back(a);
-//    arr.push_back(vd);
-//    arr.push_back(c);
-//    Row new_row(arr);
-//    std::vector<Row> row_vect;
-//    row_vect.push_back(new_row);
-//    Row empty_row;
-//    Table table("My table", row_vect);
-//    table.add_row(empty_row);
-//    table.print();
     std::string filepath = "../table.txt";
 //    table.save_as(filepath);
 //    std::ifstream file(filepath);
@@ -92,7 +75,7 @@ int main() {
 //    }
 //    table.save_as(filepath);
     Table table_txt;
-    table_txt.load(filepath);
+    table_txt.load("../table112.txt");
     table_txt.print();
     std::string a = table_txt.get_cell_content(1, 2);
     std::cout << "formula reslt: " << a;

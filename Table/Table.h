@@ -7,7 +7,8 @@
 #include "../Cell/Cell.h"
 #include "../Row/Row.h"
 #include "../Utils/Utils.h"
-
+#include "../CustomExceptions/MissingCommaError/MissingCommaError.h"
+#include "../CustomExceptions/UnknownDataTypeError/UnknownDataTypeError.h"
 #ifndef DATA_TABLES_TABLE_H
 #define DATA_TABLES_TABLE_H
 
@@ -32,6 +33,10 @@ class Table {
     void mergesort(sorting_types to_sort, unsigned int col_id, int start, int end);
     unsigned short compare_strings(const std::string &s1, const std::string &s2) const;
     static double get_string_numeric_value(const std::string &s);
+
+    void check_inconsistency(const std::string& currently_read_line);
+
+    unsigned long long int count_cells_from_row(const std::string& row_as_string);
 public:
     Table();
 
@@ -45,7 +50,9 @@ public:
 
     Table(Table &other);
 
-    void load(std::string &file_path);
+    Table(Table &&other);
+
+    void load(const std::string &file_path);
 
     void save() const;
 
