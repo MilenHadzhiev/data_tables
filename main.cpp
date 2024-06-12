@@ -24,7 +24,6 @@ int main() {
         std::cin >> command;
         if (command == "exit") break;
         try {
-
             if (command == "create") {
                 std::string new_table_name;
                 std::cin >> new_table_name;
@@ -103,8 +102,8 @@ int main() {
     std::cout<< '\n';
     table_txt.sort(3, DESC);
     table_txt.print();
-    table_txt.edit(1, 5, "=R2C4^2+R2C3-R3C6*R3C1+R3C1^R3C1");
-    std::cout << "R1C5: " << table_txt.get_cell_content(1, 5);
+//    table_txt.edit(1, 5, "=R2C4^2+R2C3-R3C6*R3C1+R3C1^R3C1");
+    std::cout << "R1C5: " << table_txt.get_cell_content(1, 4);
     table_txt.save_as(filepath);
 //    table_txt.edit/
 //    double a = std::stod("122345.678");

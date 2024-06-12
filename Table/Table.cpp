@@ -116,7 +116,7 @@ void Table::save_as(const std::string &file_path) const {
                 int r_c = (int) row.get_cells_count();
                 if (i < r_c) {
                     std::string current_cell = row.get_cell_content_by_position(i + 1);
-                    if (!(is_int(current_cell) || is_double(current_cell) || is_currency(current_cell))) {
+                    if (is_string(current_cell) && !(current_cell[0] == '"' && current_cell[current_cell.size() - 1] == '"')) {
                         file << '"' << current_cell << "\"";
                     } else {
                         file << current_cell;
@@ -243,7 +243,7 @@ void Table::print() const {
     for (unsigned int i = 0; i < rows_count; i++) {
         for (unsigned int j = 0; j < columns_count; j++) {
             unsigned int longest_cell_in_current_col = get_longest_column_length(j);
-            std::string current_string = rows[i].get_cell_content_by_position(j + 1);
+            std::string current_string = get_cell_content(i + 1, j + 1);
             std::cout << ' ';
             if (!(current_string.empty())) {
                 std::cout << current_string;
