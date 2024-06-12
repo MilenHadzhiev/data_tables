@@ -20,7 +20,7 @@ void Table::print_empty_string(unsigned int cell_len) {
 }
 
 Table::Table() {
-    file_name = "New table";
+    file_name = "";
 }
 
 Table::Table(std::string new_name) : file_name(std::move(new_name)) {}
@@ -28,32 +28,34 @@ Table::Table(std::string new_name) : file_name(std::move(new_name)) {}
 Table::Table(std::string new_name, std::vector<Row> new_rows) {
     file_name = std::move(new_name);
     rows = std::move(new_rows);
-    cols_count = get_cols_count();
 }
 
 Table::Table(std::string new_name, Row &first_row) {
     file_name = std::move(new_name);
     rows.push_back(first_row);
-    cols_count = get_cols_count();
 }
 
 Table::Table(const Table &other) {
     file_name = other.file_name;
     rows = other.rows;
-    cols_count = get_cols_count();
 }
 
 Table::Table(Table &other) {
     file_name = other.file_name;
     rows = other.rows;
-    cols_count = get_cols_count();
 }
+
+bool Table::is_table_loaded() const {
+    return file_name != "" || get_rows_count() != 0;
+}
+
 
 void Table::load(std::string &file_path) {
     if (!rows.empty()) {
-        std::cout << "Table is already populated.\n";
+        std::cout << "Table is already populated. Close current table and try again\n";
         return;
     }
+    file_name = file_path;
     std::ifstream file(file_path);
     if (file.is_open()) {
         std::string current_line;
@@ -92,18 +94,21 @@ void Table::load(std::string &file_path) {
             }
         }
         file.close();
-        cols_count = get_cols_count();
     } else {
-        std::cout << "Error: File could not be opened.";
+        std::cout << "Error: File could not be opened.\n";
     }
 }
 
 void Table::save() const {
-    save_as(file_name);
+    save_as(file_name != "" ? file_name : "new_data_table.txt");
 }
 
 void Table::save_as(const std::string &file_path) const {
-    std::ofstream file(file_path);
+    if (!is_table_loaded()) {
+        std::cout << "Error: No table to save.\n";
+        return;
+    }
+    std::ofstream file(file_path.c_str());
     if (file.is_open()) {
         int n = (int) get_cols_count();
         for (const Row &row: rows) {
@@ -112,19 +117,18 @@ void Table::save_as(const std::string &file_path) const {
                 if (i < r_c) {
                     std::string current_cell = row.get_cell_content_by_position(i + 1);
                     if (!(is_int(current_cell) || is_double(current_cell) || is_currency(current_cell))) {
-                        file << '"' << current_cell << "\", ";
+                        file << '"' << current_cell << "\"";
                     } else {
-                        file << row.get_cell_content_by_position(i + 1) << ", ";
+                        file << current_cell;
                     }
-                } else {
-                    file << ", ";
                 }
+                file << ", ";
             }
             file << '\n';
         }
         file.close();
     } else {
-        std::cout << "Error: File could not be opened to save data table.\n";
+        std::cout << "Error: File could not be opened/created to save data table.\n";
     }
 }
 
@@ -228,6 +232,14 @@ std::vector<std::string> Table::convert_infix_to_potfix_notation(const std::stri
 void Table::print() const {
     unsigned int columns_count = get_cols_count();
     unsigned int rows_count = get_rows_count();
+    if (!is_table_loaded()) {
+        std::cout << "No table has been loaded.\n";
+        return;
+    }
+    if (get_rows_count() == 0) {
+        std::cout << "Table " << file_name << " is empty.\n";
+    }
+    std::cout << "Table " << file_name << "\n";
     for (unsigned int i = 0; i < rows_count; i++) {
         for (unsigned int j = 0; j < columns_count; j++) {
             unsigned int longest_cell_in_current_col = get_longest_column_length(j);
@@ -249,54 +261,6 @@ void Table::print() const {
 void Table::edit(unsigned int row_id, unsigned int col_id, std::string new_content) {
     change_cell_content_by_position(row_id, col_id, new_content);
 }
-
-//void Table::sort_asending(unsigned int col_id, unsigned int rows_count) {
-//    // smallest -> biggest
-//    std::vector<Row> new_rows;
-//    unsigned int rows_sorted = 0;
-//    while (rows_sorted < rows_count) {
-//        std::string min = rows[0].get_cell_content_by_position(col_id);
-//        unsigned int min_row = 0;
-//        for (int i = 1; i < get_rows_count(); i++) {
-//            std::string current_cell_content = rows[i].get_cell_content_by_position(col_id);
-//            remove_whitespace(&current_cell_content);
-//            if (compare_strings(*this, min, current_cell_content) == 1) { // second string is "smaller" according to our rules
-//                min = current_cell_content;
-//                min_row = i;
-//            }
-//        }
-//
-//        new_rows.push_back(rows[min_row]);
-//        delete_row(min_row + 1);
-//        rows_sorted++;
-//    }
-//    rows.clear();
-//    rows = new_rows;
-//}
-//
-//void Table::sort_descending(unsigned int col_id, unsigned int rows_count) {
-//    std::vector<Row> new_rows;
-//    unsigned int rows_sorted = 0;
-//    while (rows_sorted < rows_count) {
-//        std::string max = rows[0].get_cell_content_by_position(col_id);
-//        unsigned int max_row = 0;
-//        for (int i = 1; i < get_rows_count(); i++) {
-//            std::string current_cell_content = rows[i].get_cell_content_by_position(col_id);
-//            current_cell_content = remove_whitespace(&current_cell_content);
-//            if (compare_strings(max, current_cell_content) == 2) { // second string is "bigger"
-//                max = current_cell_content;
-//                max_row = i;
-//            }
-//        }
-//        new_rows.push_back(rows[max_row]);
-//        delete_row(max_row + 1);
-//        rows_sorted++;
-//    }
-//    rows.clear();
-//    rows = new_rows;
-//
-//}
-
 
 void Table::merge(sorting_types to_sort, const unsigned int col_id, const int left, const int mid, const int right) {
     const int left_sub_array_size = mid - left + 1;
@@ -340,8 +304,12 @@ void Table::mergesort(sorting_types to_sort, const unsigned int col_id, const in
 }
 
 void Table::sort(unsigned int col_id, sorting_types to_sort) {
-    if (col_id - 1 > cols_count) {
-        std::cout << "There are only " << cols_count << " columns in the table.\n";
+    if (!is_table_loaded()) {
+        std::cout << "No table to sort.\n";
+        return;
+    }
+    if (col_id - 1 > get_cols_count()) {
+        std::cout << "There are only " << get_cols_count() << " columns in the table.\n";
         return;
     }
     mergesort(to_sort, col_id, 0, rows.size() - 1);
@@ -353,13 +321,8 @@ void Table::sort(unsigned int col_id, sorting_types to_sort) {
 }
 
 void Table::clear() {
-    int n = (int) rows.size();
-    for (int i = 0; i < n; i++) { // for row in rows
-        int m = (int) rows[i].get_cells_count();
-        for (int j = 0; j < m; j++) { // for cell in row
-            rows[i].change_cell_content_by_position(j, "");
-        }
-    }
+    rows.clear();
+    file_name = "";
 }
 
 Table &Table::operator=(Table other) {
@@ -373,25 +336,28 @@ void Table::change_name(std::string &new_name) {
 }
 
 void Table::change_cell_content_by_position(unsigned int row_id, unsigned int col_id, std::string new_content) {
-    if (rows.empty()) {
+    if (file_name == "") {
         std::cout << "Table not initialized.\n";
-    } else if (row_id >= get_rows_count()) {
-        std::cout << "Row doesn't exist.\n";
-    } else if (col_id >= get_cols_count()) {
-        std::cout << "Column doesn't exist.\n";
+        return;
     } else if (Cell::get_data_datatype(new_content) == UnknownDataType) {
         std::cout << "Unsupported data type.\n";
-    } else if (rows[row_id - 1].get_cells_count() == 0) {
+        return;
+    }
+    if (row_id >= get_rows_count()) {
+        for (unsigned int i = get_rows_count(); i < row_id; ++i) {
+            rows.emplace_back();
+        }
+    }
+    if (rows[row_id - 1].get_cells_count() == 0) {
         std::vector<Cell> this_row;
-        for (int i = 0; i < col_id - 2; i++) {
+        for (int i = 0; i < col_id; i++) {
             this_row.emplace_back();
         }
-        this_row.emplace_back(new_content);
+        this_row[col_id - 1].change_content(new_content);
         rows[row_id - 1] = this_row;
 
-    } else {
-        rows[row_id - 1].change_cell_content_by_position(col_id, new_content);
     }
+    rows[row_id - 1].change_cell_content_by_position(col_id, new_content);
 }
 
 void Table::add_row(Row &new_row) {

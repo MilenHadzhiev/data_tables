@@ -7,13 +7,15 @@
 #define DATA_TABLES_CELL_H
 
 enum cell_data_types {
-    Formula, String, Integer, Double, Currency, UnknownDataType
+    Empty, Formula, String, Integer, Double, Currency, UnknownDataType
 };
 
 
 class Cell {
     std::string content;
     cell_data_types cell_type;
+
+    void assign_cell_type(const std::string& new_content);
 public:
 
     static cell_data_types get_data_datatype(const std::string &s);

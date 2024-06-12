@@ -18,10 +18,11 @@ enum sorting_types {
 class Table {
     std::string file_name;
     std::vector<Row> rows;
-    int cols_count = get_cols_count();
     static const std::unordered_map<char, unsigned short> operators;
 
     static void print_empty_string(unsigned int cell_len);
+
+    bool is_table_loaded() const;
 
     unsigned int get_longest_column_length(unsigned int col_id) const;
 
