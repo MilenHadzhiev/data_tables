@@ -23,6 +23,7 @@ int main() {
     while (true) {
         std::cin >> command;
         if (command == "exit") break;
+
         try {
             if (command == "create") {
                 std::string new_table_name;

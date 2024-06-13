@@ -13,7 +13,7 @@ enum currency_type {
 template<typename T, typename U>
 void access_map_element(const std::unordered_map<T, U>& map, T& key, U& value);
 
-std::string remove_whitespace(std::string *s);
+std::string remove_whitespace(const std::string *s);
 
 // USD 1 = BGN 1.92
 // EUR 1 = BGN 1.96

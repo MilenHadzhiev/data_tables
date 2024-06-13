@@ -60,7 +60,15 @@ void Table::check_inconsistency(const std::string& currently_read_line) {
     for (unsigned int i = 0; i < rows.size(); ++i) {
         if (rows[i].get_cells_count() != current_line_size) {
             clear();
-            throw MissingCommaError(rows.size() + 1, current_line_size);
+            unsigned int row, col;
+            if (rows[i].get_cells_count() > current_line_size) {
+                row = rows.size() + 1;
+                col = current_line_size;
+            } else {
+                row = i;
+                col = rows[i].get_cells_count();
+            }
+            throw MissingCommaError(row, col);
         }
     }
 }
@@ -72,7 +80,7 @@ unsigned long long int Table::count_cells_from_row(const std::string& row_as_str
             res++;
         }
     }
-    return res++;
+    return ++res;
 }
 
 void Table::load(const std::string &file_path) {
@@ -91,7 +99,7 @@ void Table::load(const std::string &file_path) {
                 row++;
                 std::string current_cell_content;
                 int line_size = (int) current_line.size();
-//                check_inconsistency(current_line); TODO: fix
+                check_inconsistency(current_line);
                 if (current_line.empty()) {
                     cells_current_row.emplace_back();
                 } else {
@@ -106,7 +114,7 @@ void Table::load(const std::string &file_path) {
 
                         if (Cell::get_data_datatype(current_cell_content) == UnknownDataType) {
                             clear();
-                            throw UnknownDataTypeError(rows.size(), cells_current_row.size(), current_cell_content);
+                            throw UnknownDataTypeError(row, column, current_cell_content);
                         }
                         cells_current_row.emplace_back(current_cell_content);
                         current_cell_content = "";
@@ -140,11 +148,7 @@ void Table::save_as(const std::string &file_path) const {
                 int r_c = (int) row.get_cells_count();
                 if (i < r_c) {
                     std::string current_cell = row.get_cell_content_by_position(i + 1);
-                    if (is_string(current_cell) && !(current_cell[0] == '"' && current_cell[current_cell.size() - 1] == '"')) {
-                        file << '"' << current_cell << "\"";
-                    } else {
-                        file << current_cell;
-                    }
+                    file << current_cell;
                 }
                 file << ", ";
             }

@@ -7,7 +7,7 @@ void access_map_element(const std::unordered_map<T, U>& map, T& key, U& value) {
     value = res->second;
 }
 
-std::string remove_whitespace(std::string *s) {
+std::string remove_whitespace(const std::string *s) {
 //    int i = 0;
     int n = (int) s->size();
     std::string res;
@@ -56,8 +56,6 @@ bool is_string(const std::string &s) {
     if (s[0] == '"' && s[s.size() - 1] == '"') {
         return true;
     }
-    for (const char& ch : s)
-        if (!std::isdigit(ch)) return true;
     return false;
 }
 

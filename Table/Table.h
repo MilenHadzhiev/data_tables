@@ -36,7 +36,7 @@ class Table {
 
     void check_inconsistency(const std::string& currently_read_line);
 
-    unsigned long long int count_cells_from_row(const std::string& row_as_string);
+    static unsigned long long int count_cells_from_row(const std::string& row_as_string);
 public:
     Table();
 
